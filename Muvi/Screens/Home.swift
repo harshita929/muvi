@@ -7,8 +7,6 @@
 
 import SwiftUI
 
-
-
 struct Home: View {
     @State var showCard = true
     @State var viewState = CGSize.zero
@@ -19,14 +17,12 @@ struct Home: View {
     @State private var selectionIndex = 0
     
     var body: some View {
-        
-            VStack {
-                TopBar( tabs: $tabs, movieService: self.movieService, selectionIndex: $selectionIndex)
-                Cards(searchTerm: $searchTerm, movieService: self.movieService)
-                ActorCard(movieService: self.movieService)
-                Spacer()
-            }
-        
+        VStack {
+            TopBar(tabs: $tabs, movieService: movieService, selectionIndex: $selectionIndex)
+            Cards(searchTerm: $searchTerm, movieService: movieService)
+            ActorCard(movieService: movieService)
+            Spacer()
+        }
         .padding(.top, 20)
         .background(Color(.secondarySystemBackground))
         .edgesIgnoringSafeArea(.all)
@@ -44,89 +40,121 @@ struct Home_Previews: PreviewProvider {
     }
 }
 
+// MARK: - TopBar
 
 private struct TopBar: View {
     
-    @Binding var tabs: Array<String>
+    @Binding var tabs: [String]
     @ObservedObject var movieService: MovieService
     @Binding var selectionIndex: Int
     
     var body: some View {
-            VStack(alignment: .leading, spacing:10) {
-                HStack {
-                    Image(systemName: "film")
-                        .foregroundColor(.gray)
-                    Text("MOVIES")
-                        .fontWeight(.semibold)
-                        .foregroundColor(.gray)
-                }
-//                .padding()
-                HStack {
-                    Text("What would you like to see today?")
-                        .font(.system(size: 24))
-                        .fontWeight(.semibold)
-                        .frame(maxWidth: screen.maxX - 100)
-                        .lineLimit(3)
-                    Spacer()
-                    Image(systemName: "magnifyingglass").font(.system(size: 24))
-                    
-                }
-                VStack {
-                    Picker("_", selection: $selectionIndex) {
-                        ForEach(0..<tabs.count) { index in
-                            Text(tabs[index])
-                                .font(.title)
-                                .bold()
-                                .tag(index)
-                        }
-                    }.pickerStyle(SegmentedPickerStyle())
-                    .onChange(of: selectionIndex) { (_) in
-                        if selectionIndex == 0 {
-                            movieService.getNowPlaying()
-                        } else if selectionIndex == 1 {
-                            movieService.getUpcoming()
-                        } else if selectionIndex == 2 {
-                            movieService.getPopular()
-                        }
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Image(systemName: "film")
+                    .foregroundColor(.gray)
+                Text("MOVIES")
+                    .fontWeight(.semibold)
+                    .foregroundColor(.gray)
+            }
+
+            HStack {
+                Text("What would you like to see today?")
+                    .font(.system(size: 24))
+                    .fontWeight(.semibold)
+                    .frame(maxWidth: UIScreen.main.bounds.width - 100, alignment: .leading)
+                    .lineLimit(3)
+                Spacer()
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 24))
+            }
+
+            VStack {
+                Picker("_", selection: $selectionIndex) {
+                    ForEach(0..<tabs.count) { index in
+                        Text(tabs[index])
+                            .font(.title)
+                            .bold()
+                            .tag(index)
                     }
-                }.padding()
-            }.padding()
+                }
+                .pickerStyle(SegmentedPickerStyle())
+                .onChange(of: selectionIndex) { _ in
+                    switch selectionIndex {
+                    case 0: movieService.getNowPlaying()
+                    case 1: movieService.getUpcoming()
+                    case 2: movieService.getPopular()
+                    default: break
+                    }
+                }
+            }
+            .padding(.top, 5)
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(.ultraThinMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20)
+                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                )
+                .shadow(radius: 10)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .padding(.horizontal)
     }
 }
 
-
+// MARK: - Cards
 
 private struct Cards: View {
     @Binding var searchTerm: String
     @ObservedObject var movieService: MovieService
     
     var body: some View {
-            ScrollView(.horizontal, showsIndicators: false) {
+        ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 20) {
                 ForEach(movieService.movies.filter {
-                            searchTerm.isEmpty ? true :
-                                $0.title?.lowercased().localizedStandardContains(searchTerm.lowercased()) ?? true }) { movie in
+                    searchTerm.isEmpty ? true :
+                        $0.title?.lowercased().localizedStandardContains(searchTerm.lowercased()) ?? true
+                }) { movie in
                     GeometryReader { geometry in
-                        
-                        NavigationLink(destination: FilmDetail(movie: movie)){
-                        FilmCard(movie: movie)
-                            .rotation3DEffect(Angle(degrees: Double(geometry.frame(in: .global).minX) - 50) / -getAngleMultiplier(), axis: (x: 0, y: 10, z: 0))
+                        NavigationLink(destination: FilmDetail(movie: movie)) {
+                            FilmCard(movie: movie)
+                                .rotation3DEffect(
+                                    Angle(degrees: Double(geometry.frame(in: .global).minX) - 50) / -getAngleMultiplier(),
+                                    axis: (x: 0, y: 10, z: 0)
+                                )
                         }
                     }
+                    .frame(width: 200, height: 280)
                 }
-                .frame(width: 200, height: 280)
-                .animation(.easeInOut(duration: 0.5))
-                .transition(.opacity)
-                .shadow(color: Color(#colorLiteral(red: 0.501960814, green: 0.501960814, blue: 0.501960814, alpha: 1))
-                            .opacity(0.1), radius: 0, x: 7, y:7)
-            }.onAppear {
+            }
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 25, style: .continuous)
+                    .fill(.ultraThinMaterial)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 25)
+                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                    )
+                    .shadow(radius: 10)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 25, style: .continuous))
+            .padding(.horizontal)
+            .onAppear {
                 movieService.getNowPlaying()
                 movieService.getActors()
             }
-            .padding(.horizontal)
-        }.onAppear(perform: {
+        }
+        .onAppear {
             UIScrollView.appearance().bounces = false
-        })
-        
+        }
     }
+}
+
+// MARK: - Utility
+
+private func getAngleMultiplier() -> Double {
+    return 20
 }
