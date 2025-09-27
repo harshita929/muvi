@@ -2,8 +2,7 @@
 //  SeatsChoiceView.swift
 //  Muvi
 //
-//  Created by Mirzayev Farid on 16.07.2021.
-//
+
 
 import SwiftUI
 import AlertToast

@@ -1,9 +1,7 @@
 //
 //  FilmDetail.swift
 //  Muvi
-//
-//  Created by Mirzayev Farid on 15.07.2021.
-//
+
 
 import SwiftUI
 
@@ -52,10 +50,7 @@ struct FilmDetail: View {
 
                 }
             }
-//            BottomSheetView(isOpen: $showModal, maxHeight: screen.height - 90, title: "Mark Your Calendar") {
-//                SeatsChoiceView(movie: movie)
-//            }
-//            .edgesIgnoringSafeArea(.all)
+
 
             
         }
