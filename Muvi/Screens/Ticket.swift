@@ -1,9 +1,7 @@
 //
 //  Ticket.swift
 //  Muvi
-//
-//  Created by Mirzayev Farid on 19.07.2021.
-//
+
 
 import SwiftUI
 import CarBode
